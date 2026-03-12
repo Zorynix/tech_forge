@@ -1,0 +1,7 @@
+rootProject.name = 'tech-market'
+
+include 'api-gateway'
+include 'product-service'
+include 'auth-service'
+include 'order-service'
+include 'notification-service'

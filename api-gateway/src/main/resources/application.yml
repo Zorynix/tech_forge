@@ -1,0 +1,90 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  # Redis / Dragonfly for rate limiting
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 2000ms
+
+  cloud:
+    gateway:
+      # Global defaults
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "${FRONTEND_ORIGIN}"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            exposed-headers:
+              - Authorization
+              - Content-Type
+              - X-Request-Id
+            allow-credentials: true
+            max-age: 3600
+
+      # Routes defined programmatically in GatewayConfig.java
+      # but YAML overrides can be added here if needed.
+
+# Resilience4j circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: COUNT_BASED
+    instances:
+      productServiceCB:
+        base-config: default
+      authServiceCB:
+        base-config: default
+      orderServiceCB:
+        base-config: default
+      notificationServiceCB:
+        base-config: default
+
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 5s
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.techmarket.apigateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    io.github.resilience4j: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator endpoints (health checks, metrics)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, gateway, metrics
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true

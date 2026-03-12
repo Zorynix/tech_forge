@@ -1,0 +1,2 @@
+-- Only real 3D models (generated garbage removed)
+-- iPhone 17 Pro model will be set in V8

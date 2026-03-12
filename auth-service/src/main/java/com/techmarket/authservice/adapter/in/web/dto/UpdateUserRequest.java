@@ -1,0 +1,11 @@
+package com.techmarket.authservice.adapter.in.web.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record UpdateUserRequest(
+        @NotBlank(message = "Name is required")
+        @Size(min = 1, max = 255, message = "Name must be between 1 and 255 characters")
+        String name
+) {
+}
