@@ -1,12 +1,18 @@
 plugins {
-    id 'org.springframework.boot' version '3.4.3' apply false
+    id 'org.springframework.boot' version '4.0.1' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'jacoco'
+}
+
+repositories {
+    mavenCentral()
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
 
     group = 'com.techmarket'
     version = '0.0.1-SNAPSHOT'
@@ -21,23 +27,77 @@ subprojects {
         mavenCentral()
     }
 
+
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'org.springframework.boot:spring-boot-starter-jackson'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
 
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.security:spring-security-test'
+        testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+        testImplementation platform('org.testcontainers:testcontainers-bom:2.0.3')
+        testImplementation 'org.testcontainers:testcontainers-postgresql'
+        testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testRuntimeOnly 'com.h2database:h2'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 
     tasks.named('test') {
         useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+
+    jacoco {
+        toolVersion = '0.8.14'
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            html.required = true
+            csv.required = false
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                limit {
+                    minimum = 0.60
+                }
+            }
+        }
     }
 
     tasks.matching { it.name == 'bootRun' }.configureEach {
         workingDir = project.projectDir
+    }
+}
+
+// Aggregated coverage report
+task jacocoAggregatedReport(type: JacocoReport) {
+    dependsOn subprojects*.test
+
+    additionalSourceDirs.from(subprojects.collect { it.sourceSets.main.allJava.srcDirs }.flatten())
+    sourceDirectories.from(subprojects.collect { it.sourceSets.main.allJava.srcDirs }.flatten())
+    classDirectories.from(subprojects.collect { it.sourceSets.main.output }.flatten())
+    executionData.from(subprojects.collect {
+        it.tasks.withType(Test).collect { t -> t.extensions.getByType(JacocoTaskExtension).destinationFile }
+    }.flatten().findAll { it?.exists() })
+
+    reports {
+        xml.required = true
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/aggregated')
     }
 }

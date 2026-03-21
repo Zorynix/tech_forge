@@ -1,0 +1,36 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: product-service-test
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: product_service
+        format_sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    schemas: product_service
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  cache:
+    type: none
+
+app:
+  cache:
+    product-ttl-minutes: 1
+    category-ttl-minutes: 1
+  jwt:
+    secret: test-secret-key-must-be-at-least-32-characters-long-for-hmac-sha256
+
+logging:
+  level:
+    com.techmarket.productservice: WARN
+    org.testcontainers: INFO
