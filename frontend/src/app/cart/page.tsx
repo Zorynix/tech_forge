@@ -47,7 +47,7 @@ export default function CartPage() {
 
     setOrdering(true);
     try {
-      // Sync local cart to server before creating order
+ 
       await fetchCart();
       await createOrder({ phone: phone || undefined, email: email || undefined });
       await clear();

@@ -14,28 +14,7 @@ spring:
 
   cloud:
     gateway:
-      # Global defaults
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
-
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowed-origins: "${FRONTEND_ORIGIN}"
-            allowed-methods:
-              - GET
-              - POST
-              - PUT
-              - PATCH
-              - DELETE
-              - OPTIONS
-            allowed-headers: "*"
-            exposed-headers:
-              - Authorization
-              - Content-Type
-              - X-Request-Id
-            allow-credentials: true
-            max-age: 3600
+      # CORS is handled by CorsConfig.java bean
 
       # Routes defined programmatically in GatewayConfig.java
       # but YAML overrides can be added here if needed.

@@ -1,5 +1,6 @@
 package com.techmarket.apigateway.infrastructure.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -12,6 +13,18 @@ public class GatewayConfig {
 
     private final RedisRateLimiter redisRateLimiter;
     private final KeyResolver ipKeyResolver;
+
+    @Value("${PRODUCT_SERVICE_URL:http://localhost:8081}")
+    private String productServiceUrl;
+
+    @Value("${AUTH_SERVICE_URL:http://localhost:8082}")
+    private String authServiceUrl;
+
+    @Value("${ORDER_SERVICE_URL:http://localhost:8083}")
+    private String orderServiceUrl;
+
+    @Value("${NOTIFICATION_SERVICE_URL:http://localhost:8084}")
+    private String notificationServiceUrl;
 
     public GatewayConfig(RedisRateLimiter redisRateLimiter, KeyResolver ipKeyResolver) {
         this.redisRateLimiter = redisRateLimiter;
@@ -33,7 +46,7 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver))
                                 .retry(retryConfig -> retryConfig.setRetries(2)))
-                        .uri("http://localhost:8081"))
+                        .uri(productServiceUrl))
 
                 .route("product-service-categories", r -> r
                         .path("/api/v1/categories/**")
@@ -45,7 +58,7 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver))
                                 .retry(retryConfig -> retryConfig.setRetries(2)))
-                        .uri("http://localhost:8081"))
+                        .uri(productServiceUrl))
 
                 // Auth Service routes
                 .route("auth-service-auth", r -> r
@@ -58,7 +71,7 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver))
                                 .retry(retryConfig -> retryConfig.setRetries(2)))
-                        .uri("http://localhost:8082"))
+                        .uri(authServiceUrl))
 
                 .route("auth-service-users", r -> r
                         .path("/api/v1/users/**")
@@ -70,7 +83,7 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver))
                                 .retry(retryConfig -> retryConfig.setRetries(2)))
-                        .uri("http://localhost:8082"))
+                        .uri(authServiceUrl))
 
                 // Order Service routes
                 .route("order-service-cart", r -> r
@@ -83,7 +96,7 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver))
                                 .retry(retryConfig -> retryConfig.setRetries(2)))
-                        .uri("http://localhost:8083"))
+                        .uri(orderServiceUrl))
 
                 .route("order-service-orders", r -> r
                         .path("/api/v1/orders/**")
@@ -95,7 +108,7 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver))
                                 .retry(retryConfig -> retryConfig.setRetries(2)))
-                        .uri("http://localhost:8083"))
+                        .uri(orderServiceUrl))
 
                 // Notification Service routes
                 .route("notification-service-telegram", r -> r
@@ -107,7 +120,7 @@ public class GatewayConfig {
                                 .requestRateLimiter(rl -> rl
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver)))
-                        .uri("http://localhost:8084"))
+                        .uri(notificationServiceUrl))
 
                 .route("notification-service", r -> r
                         .path("/api/v1/notifications/**")
@@ -119,7 +132,7 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipKeyResolver))
                                 .retry(retryConfig -> retryConfig.setRetries(2)))
-                        .uri("http://localhost:8084"))
+                        .uri(notificationServiceUrl))
 
                 .build();
     }

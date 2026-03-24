@@ -19,7 +19,7 @@ public class RateLimitConfig {
      */
     @Bean
     public RedisRateLimiter redisRateLimiter() {
-        return new RedisRateLimiter(20, 40, 1);
+        return new RedisRateLimiter(100, 200, 1);
     }
 
     /**
